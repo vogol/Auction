@@ -40,7 +40,7 @@ public class Lot {
     }
 
     //TODO: try AtomicReference
-    public synchronized boolean updateBid(Bid bid) {
+    public /*synchronized*/ boolean updateBid(Bid bid) {
         if (bid.getValue() <= currentBid.getValue()) {
             log.trace("Bid {} has smaller value then current {}", bid, currentBid);
             return false;
@@ -51,7 +51,7 @@ public class Lot {
         return true;
     }
 
-    public synchronized LotDescription getDecription() {
+    public /*synchronized*/ LotDescription getDecription() {
         long time = SystemTime.getTimeMs();
         long timePassed = time - startTime;
         long timeLeft = duration - timePassed;

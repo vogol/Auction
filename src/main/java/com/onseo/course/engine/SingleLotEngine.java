@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by VOgol on 17.11.2016.
@@ -22,12 +22,15 @@ public class SingleLotEngine implements Auction {
     private final List<HistoryItem> history = new CopyOnWriteArrayList<>();
     private final AtomicBoolean active = new AtomicBoolean(false);
     private final CountDownLatch latch = new CountDownLatch(1);
+    private final CompletableFuture<AuctionResult> auctionFinishFuture = new CompletableFuture<>();
+    private final AtomicInteger bidsCounter = new AtomicInteger(0);
+    private final AtomicInteger visitsCounter = new AtomicInteger(0);
 
     public SingleLotEngine(Lot lot) {
         this.lot = lot;
     }
 
-    public void start() {
+    public CompletableFuture<AuctionResult> start() {
         log.info("Auction on lot {} is started", lot);
 
         active.set(true);
@@ -36,29 +39,27 @@ public class SingleLotEngine implements Auction {
 
         ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1);
         executorService.schedule(this::finish, lot.getDuration(), TimeUnit.SECONDS);
+
+        return auctionFinishFuture;
     }
 
     private void finish() {
         active.set(false);
-        log.info("Auction on Lot {} is finished. Winner: {} with bid: {}",
-                lot.getName(), lot.getCurrentBid().getBidder(), lot.getCurrentBid().getValue());
+        AuctionResult result = new AuctionResult(
+                lot.getName(),
+                lot.getCurrentBid().getBidder(), lot.getCurrentBid().getValue(),
+                history, bidsCounter.get(), visitsCounter.get());
 
-        printHistory("Full history", history);
-        printHistory("Success bids", history.stream().filter(HistoryItem::isSuccess).collect(Collectors.toList()));
-    }
-
-    private void printHistory(String title, List<HistoryItem> history) {
-        log.info("=== {} ===", title);
-        history.forEach(h -> log.info(h.toString()));
+        auctionFinishFuture.complete(result);
     }
 
     @Override
-    public LotDescription getLot()  {
+    public synchronized LotDescription getLot() {
         return lot.getDecription();
     }
 
     @Override
-    public void bid(LotDescription lotDescription, Bid bid) {
+    public synchronized void bid(LotDescription lotDescription, Bid bid) {
         log.trace("Got bid {} on {}", bid, lotDescription.getName());
         if (!active.get()) {
             log.warn("Bid {} discarded - Auction is finished", bid);
@@ -72,12 +73,14 @@ public class SingleLotEngine implements Auction {
             return;
         }
 
+        bidsCounter.incrementAndGet();
+
         boolean bidStatus = lot.updateBid(bid);
 
         history.add(new HistoryItem(bid, bidStatus));
 
         if (bidStatus) {
-            log.info("New highest bid: {}", bid);
+            log.debug("New highest bid: {}", bid);
         }
 
     }
