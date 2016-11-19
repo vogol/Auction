@@ -6,9 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -16,8 +14,8 @@ import java.util.stream.Collectors;
 /**
  * Created by VOgol on 15.11.2016.
  */
-public class Engine {
-    private static final Logger log = LoggerFactory.getLogger(Engine.class);
+public class MultiLotEngine {
+    private static final Logger log = LoggerFactory.getLogger(MultiLotEngine.class);
 
     private final Map<String, Lot> activeLots = new HashMap<>();
     private final Map<String, Lot> finishedLots = new HashMap<>();
@@ -32,7 +30,7 @@ public class Engine {
         }
 
         if (previous == null) {
-            log.info("Engine: new lot registered: {}. Total lots: {}", lot, size);
+            log.info("MultiLotEngine: new lot registered: {}. Total lots: {}", lot, size);
         } else {
             log.warn("Lot \'{}\' is already registered", lot.getName());
         }
@@ -52,23 +50,28 @@ public class Engine {
     }
 
     public void tick() {
-        long curTime = SystemTime.getTimeMs();
-        log.debug("Auction tick, time: {}", curTime);
-        Map<String, Lot> finished;
+        long tickTime = SystemTime.getTimeMs();
+        log.debug("Auction tick, time: {}", tickTime);
 
-        synchronized (this) {
-            finished = activeLots.values().stream()
-                    .filter(lot -> lot.getFinishTime() < curTime)
-                    .collect(Collectors.toMap(Lot::getName, Function.identity()));
+        checkFinishedLots(tickTime);
 
-            finished.keySet().forEach(lot -> activeLots.remove(lot));
-            finishedLots.putAll(finished);
-        }
+    }
 
-        finished.keySet().forEach(lot -> {
-            log.info("Found finished lot: {}", lot);
-        });
-
+    private void checkFinishedLots(long tickTime) {
+//        Map<String, Lot> finished;
+//
+//        synchronized (this) {
+//            finished = activeLots.values().stream()
+//                    .filter(lot -> lot.getFinishTime() < tickTime)
+//                    .collect(Collectors.toMap(Lot::getName, Function.identity()));
+//
+//            finished.keySet().forEach(lot -> activeLots.remove(lot));
+//            finishedLots.putAll(finished);
+//        }
+//
+//        finished.keySet().forEach(lot -> {
+//            log.info("Found finished lot: {}", lot);
+//        });
     }
 
     public Set<String> getActiveLots() {
