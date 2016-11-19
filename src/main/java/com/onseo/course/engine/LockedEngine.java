@@ -12,15 +12,17 @@ import java.util.Collection;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Created by VOgol on 17.11.2016.
  */
-public class SynchronizedEngine implements Auction {
-    private static final Logger log = LoggerFactory.getLogger(SynchronizedEngine.class);
+public class LockedEngine implements Auction {
+    private static final Logger log = LoggerFactory.getLogger(LockedEngine.class);
 
     private final Lot lot;
-//    private final List<HistoryItem> history = new CopyOnWriteArrayList<>();
+    //    private final List<HistoryItem> history = new CopyOnWriteArrayList<>();
 //    private final List<HistoryItem> history = new LinkedList<>();
     private final Collection<HistoryItem> history = new ConcurrentLinkedQueue<>();
     private final AtomicBoolean active = new AtomicBoolean(false);
@@ -29,11 +31,13 @@ public class SynchronizedEngine implements Auction {
     private final AtomicInteger bidsCounter = new AtomicInteger(0);
     private final AtomicInteger viewsCounter = new AtomicInteger(0);
 
-    public SynchronizedEngine(Lot lot) {
+    private final ReadWriteLock lotLock = new ReentrantReadWriteLock();
+    private final ReadWriteLock historyLock = new ReentrantReadWriteLock();
+
+    public LockedEngine(Lot lot) {
         this.lot = lot;
     }
 
-    @Override
     public CompletableFuture<AuctionResult> start() {
         log.info("Auction on lot {} is started", lot);
 
@@ -58,8 +62,13 @@ public class SynchronizedEngine implements Auction {
     }
 
     @Override
-    public synchronized LotDescription getLot() {
-        return lot.getDecription();
+    public LotDescription getLot() {
+        getLotLock().readLock().lock();
+        try {
+            return lot.getDecription();
+        } finally {
+            getLotLock().readLock().unlock();
+        }
     }
 
     @Override
@@ -79,10 +88,20 @@ public class SynchronizedEngine implements Auction {
 
         bidsCounter.incrementAndGet();
 
-        boolean bidStatus = lot.updateBid(bid);
+        boolean bidStatus;
+        getLotLock().writeLock().lock();
+        try {
+            bidStatus = lot.updateBid(bid);
 
-        history.add(new HistoryItem(bid, bidStatus));
-
+            getHistoryLock().writeLock().lock();
+            try {
+                history.add(new HistoryItem(bid, bidStatus));
+            } finally {
+                getHistoryLock().writeLock().unlock();
+            }
+        } finally {
+            getLotLock().writeLock().unlock();
+        }
         if (bidStatus) {
             log.debug("New highest bid: {}", bid);
         }
@@ -90,8 +109,13 @@ public class SynchronizedEngine implements Auction {
 
     @Override
     public synchronized Collection<HistoryItem> getHistory() {
-        viewsCounter.incrementAndGet();
-        return new ArrayList<>(history);
+        getHistoryLock().readLock().lock();
+        try {
+            viewsCounter.incrementAndGet();
+            return new ArrayList<>(history);
+        } finally {
+            getHistoryLock().readLock().unlock();
+        }
     }
 
     @Override
@@ -110,5 +134,13 @@ public class SynchronizedEngine implements Auction {
         }
 
         return null;
+    }
+
+    private ReadWriteLock getLotLock() {
+        return lotLock;
+    }
+
+    private ReadWriteLock getHistoryLock() {
+        return historyLock;
     }
 }
