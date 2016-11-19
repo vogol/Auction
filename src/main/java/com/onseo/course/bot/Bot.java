@@ -44,7 +44,7 @@ public class Bot implements BotInfo, Runnable {
                 }
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.warn("Interrupted", e);
             Thread.currentThread().interrupt();
         } catch (OutOfMoneyException e) {
             log.debug("Bot {}: Out of money", name);
