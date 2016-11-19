@@ -14,7 +14,10 @@ import java.util.stream.Collectors;
 /**
  * Created by VOgol on 15.11.2016.
  */
-public class MultiLotEngine {
+public class MultiLotEngine{
+
+}
+/*public class MultiLotEngine {
     private static final Logger log = LoggerFactory.getLogger(MultiLotEngine.class);
 
     private final Map<String, Lot> activeLots = new HashMap<>();
@@ -87,4 +90,4 @@ public class MultiLotEngine {
             return "No such lot " + lotKey;
         }
     }
-}
+}*/

@@ -2,6 +2,8 @@ package com.onseo.course.common;
 
 import lombok.Data;
 
+import java.util.UUID;
+
 /**
  * Created by VOgol on 15.11.2016.
  */

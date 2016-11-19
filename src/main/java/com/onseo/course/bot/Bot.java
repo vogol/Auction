@@ -1,6 +1,7 @@
 package com.onseo.course.bot;
 
-import com.onseo.course.common.LotDescription;
+import com.onseo.course.common.Bid;
+import com.onseo.course.common.Lot.LotDescription;
 import com.onseo.course.engine.Auction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,25 +25,31 @@ public class Bot {
     public void run(Auction auction, ExecutorService executorService) {
         executorService.submit(() -> {
             try {
-                do {
-                    LotDescription lot = auction.getLot(1000);
+                auction.waitForStart();
+
+                while (auction.isActive()) {
+                    LotDescription lot = auction.getLot();
                     if (lot != null) {
-//                        log.info("{} got lot: {}, value: {}", name, lot.getName(), lot.getCurrentBid());
+                        log.trace("{} got lot: {}", name, lot);
 
-                        Integer bid = logic.calcBid(lot);
+                        if (!lot.getCurrentBid().getBidder().equals(name)) {
+                            Integer bidValue = logic.calcBid(lot);
 
-                        if (bid == null) {
-                            auction.pass(lot, name);
-                        } else {
-                            auction.bid(lot, name, bid);
+                            if (bidValue != null) {
+                                Bid bid = new Bid(bidValue, name);
+                                auction.bid(lot, bid);
+                            }
                         }
                     }
                 }
-                while (auction.isActive());
             } catch (InterruptedException e) {
-                log.warn("Bot {} is interrupted", name);
+                e.printStackTrace();
                 Thread.currentThread().interrupt();
+            } catch (OutOfMoneyException e) {
+                log.debug("Bot {}: Out of money", name);
             }
+
+            log.debug("Bot {} finished his work", name);
         });
     }
 }

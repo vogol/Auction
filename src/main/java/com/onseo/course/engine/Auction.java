@@ -1,19 +1,17 @@
 package com.onseo.course.engine;
 
-import com.onseo.course.common.Lot;
-import com.onseo.course.common.LotDescription;
-
-import java.util.concurrent.BlockingQueue;
+import com.onseo.course.common.Bid;
+import com.onseo.course.common.Lot.LotDescription;
 
 /**
  * Created by VOgol on 17.11.2016.
  */
 public interface Auction {
-    LotDescription getLot(long waitMillis) throws InterruptedException;
+    LotDescription getLot();
 
-    void bid(LotDescription lot, String name, int value) throws InterruptedException;
-
-    void pass(LotDescription lot, String name) throws InterruptedException;
+    void bid(LotDescription lotDescription, Bid bid);
 
     boolean isActive();
+
+    void waitForStart() throws InterruptedException;
 }

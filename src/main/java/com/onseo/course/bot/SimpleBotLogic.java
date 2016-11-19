@@ -1,6 +1,6 @@
 package com.onseo.course.bot;
 
-import com.onseo.course.common.LotDescription;
+import com.onseo.course.common.Lot.LotDescription;
 import com.onseo.course.util.RNG;
 
 /**
@@ -14,9 +14,9 @@ public class SimpleBotLogic implements BotLogic {
     }
 
     @Override
-    public Integer calcBid(LotDescription lot) {
+    public Integer calcBid(LotDescription lot) throws OutOfMoneyException {
         if (lot.getCurrentBid().getValue() >= maxValue) {
-            return null;
+            throw new OutOfMoneyException();
         }
 
         return RNG.randomFromInterval(lot.getCurrentBid().getValue(), maxValue);

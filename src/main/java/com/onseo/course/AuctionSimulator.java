@@ -12,10 +12,8 @@ import java.util.concurrent.Executors;
 
 /**
  * Hello world!
- *
  */
-public class AuctionSimulator
-{
+public class AuctionSimulator {
     private static final Logger log = LoggerFactory.getLogger(AuctionSimulator.class);
 
 
@@ -25,29 +23,25 @@ public class AuctionSimulator
         SimpleBotLogic simpleBotLogic = new SimpleBotLogic(5000);
 
         for (int i = 0; i < amount; i++) {
-            log.info("Init bot with index {}", i);
             Bot bot = new Bot("Bot-" + i, simpleBotLogic);
             bot.run(auction, executorService);
         }
+        SimpleBotLogic simpleBotLogic2 = new SimpleBotLogic(6000);
+        Bot bot = new Bot("Bot-" + 100, simpleBotLogic2);
+        bot.run(auction, executorService);
     }
 
     private void start() {
-        try {
-            Lot lot = new Lot("First LOT", 5, 100);
+        Lot lot = new Lot("First LOT", 5, 100);
 
-            SingleLotEngine auction = new SingleLotEngine(lot);
+        SingleLotEngine auction = new SingleLotEngine(lot);
 
-            initBots(100, auction);
+        initBots(10, auction);
 
-            auction.start();
-        } catch (InterruptedException e) {
-            log.warn("Auction interrupted", e);
-        }
+        auction.start();
     }
 
-    public static void main( String[] args )
-    {
-        log.error("!!!");
+    public static void main(String[] args) {
         AuctionSimulator simulator = new AuctionSimulator();
         simulator.start();
     }
