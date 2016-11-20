@@ -18,7 +18,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * Created by VOgol on 17.11.2016.
  */
-public class DoubleLockedEngine extends SingleLockedEngine {
+public class DoubleLockedEngine extends LockedEngine {
 
     public DoubleLockedEngine(Lot lot) {
         super(lot);
