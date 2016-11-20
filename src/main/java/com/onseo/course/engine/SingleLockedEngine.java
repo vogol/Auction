@@ -8,7 +8,6 @@ import com.onseo.course.common.Lot.LotDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -19,8 +18,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * Created by VOgol on 17.11.2016.
  */
-public class LockedEngine implements Auction {
-    private static final Logger log = LoggerFactory.getLogger(LockedEngine.class);
+public class SingleLockedEngine implements Auction {
+    private static final Logger log = LoggerFactory.getLogger(SingleLockedEngine.class);
 
     private final Lot lot;
     private final History history = new History();
@@ -31,10 +30,10 @@ public class LockedEngine implements Auction {
     private final AtomicInteger bidsCounter = new AtomicInteger(0);
     private final AtomicInteger viewsCounter = new AtomicInteger(0);
 
-    private final ReadWriteLock lotLock = new ReentrantReadWriteLock();
-    private final ReadWriteLock historyLock = new ReentrantReadWriteLock();
+    protected final ReadWriteLock lotLock = new ReentrantReadWriteLock();
+    protected final ReadWriteLock historyLock = new ReentrantReadWriteLock();
 
-    public LockedEngine(Lot lot) {
+    public SingleLockedEngine(Lot lot) {
         this.lot = lot;
     }
 
@@ -136,11 +135,11 @@ public class LockedEngine implements Auction {
         return null;
     }
 
-    private ReadWriteLock getLotLock() {
+    protected ReadWriteLock getLotLock() {
         return lotLock;
     }
 
-    private ReadWriteLock getHistoryLock() {
-        return historyLock;
+    protected ReadWriteLock getHistoryLock() {
+        return lotLock;
     }
 }

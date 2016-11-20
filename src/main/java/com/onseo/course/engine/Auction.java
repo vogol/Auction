@@ -22,4 +22,8 @@ public interface Auction {
     void waitForStart() throws InterruptedException;
 
     Collection<HistoryItem> getHistory();
+
+    default String getDescription() {
+        return this.getClass().getSimpleName();
+    }
 }

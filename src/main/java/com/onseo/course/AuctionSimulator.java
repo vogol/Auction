@@ -6,7 +6,7 @@ import com.onseo.course.bot.SimpleIncLogic;
 import com.onseo.course.common.Lot;
 import com.onseo.course.engine.Auction;
 import com.onseo.course.engine.AuctionResult;
-import com.onseo.course.engine.LockedEngine;
+import com.onseo.course.engine.DoubleLockedEngine;
 import com.onseo.course.history.HistoryItem;
 import com.onseo.course.viewer.Viewer;
 import org.slf4j.Logger;
@@ -26,6 +26,12 @@ public class AuctionSimulator {
     private static final int BOTS_MONEY = 1_000_000;
     private static final int VIEWERS_COUNT = 1000;
     private static final int VIEWERS_THREADS_COUNT = 1000;
+
+
+    private Lot lot = new Lot("First LOT", AUCTIOIN_DURATION, 1);
+//    private Auction auction = new SynchronizedEngine(lot);
+//    private Auction auction = new SingleLockedEngine(lot);
+    private Auction auction = new DoubleLockedEngine(lot);
 
     ExecutorService botsExecutor = Executors.newFixedThreadPool(BOTS_THREADS_COUNT);
     ExecutorService viewersExecutor = Executors.newFixedThreadPool(VIEWERS_THREADS_COUNT);
@@ -47,10 +53,6 @@ public class AuctionSimulator {
     }
 
     private void start() {
-        Lot lot = new Lot("First LOT", AUCTIOIN_DURATION, 1);
-
-//        Auction auction = new SynchronizedEngine(lot);
-        Auction auction = new LockedEngine(lot);
 
         initBots(BOTS_COUNT, auction);
         initViewers(VIEWERS_COUNT, auction);
@@ -78,6 +80,8 @@ public class AuctionSimulator {
                 + "\nBOTS_MONEY:            " + BOTS_MONEY
                 + "\nVIEWERS_COUNT:         " + VIEWERS_COUNT
                 + "\nVIEWERS_THREADS_COUNT: " + VIEWERS_THREADS_COUNT
+                + "\n"
+                + "\nAuction engine:        " + auction.getDescription()
                 + "\nHistory storage:       " + auctionResult.getBidsHistory().getDescription()
                 + "\n"
                 + "\nTotal bids:   " + auctionResult.getBidsCounter()
@@ -86,6 +90,22 @@ public class AuctionSimulator {
                 + "\nWinner:       " + auctionResult.getWinnerName()
                 + "\nFinal price:  " + auctionResult.getFinalPrice()
                 + "\n"
+        );
+        log.info("\n\n======TSV======"
+                        + "\nDuration\tBots\tBotsThreads\tBotsMoney\tViewers\tViewersThreads\tAuction engine\tHistory storage\tTotal bids\tTotal views\tWinner\tFinal price"
+                        + "\n{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}"
+                , AUCTIOIN_DURATION
+                , BOTS_COUNT
+                , BOTS_THREADS_COUNT
+                , BOTS_MONEY
+                , VIEWERS_COUNT
+                , VIEWERS_THREADS_COUNT
+                , auction.getDescription()
+                , auctionResult.getBidsHistory().getDescription()
+                , auctionResult.getBidsCounter()
+                , auctionResult.getViewsCounter()
+                , auctionResult.getWinnerName()
+                , auctionResult.getFinalPrice()
         );
     }
 
