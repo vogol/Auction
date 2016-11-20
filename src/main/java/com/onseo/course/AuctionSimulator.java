@@ -3,12 +3,11 @@ package com.onseo.course;
 import com.onseo.course.bot.Bot;
 import com.onseo.course.bot.BotLogic;
 import com.onseo.course.bot.SimpleIncLogic;
-import com.onseo.course.common.HistoryItem;
 import com.onseo.course.common.Lot;
 import com.onseo.course.engine.Auction;
 import com.onseo.course.engine.AuctionResult;
 import com.onseo.course.engine.LockedEngine;
-import com.onseo.course.engine.SynchronizedEngine;
+import com.onseo.course.history.HistoryItem;
 import com.onseo.course.viewer.Viewer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 
 public class AuctionSimulator {
@@ -80,6 +78,7 @@ public class AuctionSimulator {
                 + "\nBOTS_MONEY:            " + BOTS_MONEY
                 + "\nVIEWERS_COUNT:         " + VIEWERS_COUNT
                 + "\nVIEWERS_THREADS_COUNT: " + VIEWERS_THREADS_COUNT
+                + "\nHistory storage:       " + auctionResult.getBidsHistory().getDescription()
                 + "\n"
                 + "\nTotal bids:   " + auctionResult.getBidsCounter()
                 + "\nTotal views:  " + auctionResult.getViewsCounter()

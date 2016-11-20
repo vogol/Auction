@@ -1,9 +1,10 @@
 package com.onseo.course.engine;
 
 import com.onseo.course.common.Bid;
-import com.onseo.course.common.HistoryItem;
 import com.onseo.course.common.Lot;
 import com.onseo.course.common.Lot.LotDescription;
+import com.onseo.course.history.History;
+import com.onseo.course.history.HistoryItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +21,8 @@ public class SynchronizedEngine implements Auction {
     private static final Logger log = LoggerFactory.getLogger(SynchronizedEngine.class);
 
     private final Lot lot;
-//    private final List<HistoryItem> history = new CopyOnWriteArrayList<>();
-//    private final List<HistoryItem> history = new LinkedList<>();
-    private final Collection<HistoryItem> history = new ConcurrentLinkedQueue<>();
+    private final History history = new History();
+
     private final AtomicBoolean active = new AtomicBoolean(false);
     private final CountDownLatch latch = new CountDownLatch(1);
     private final CompletableFuture<AuctionResult> auctionFinishFuture = new CompletableFuture<>();
@@ -91,7 +91,7 @@ public class SynchronizedEngine implements Auction {
     @Override
     public synchronized Collection<HistoryItem> getHistory() {
         viewsCounter.incrementAndGet();
-        return new ArrayList<>(history);
+        return history.get();
     }
 
     @Override

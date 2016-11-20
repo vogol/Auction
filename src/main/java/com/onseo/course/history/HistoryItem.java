@@ -1,5 +1,6 @@
-package com.onseo.course.common;
+package com.onseo.course.history;
 
+import com.onseo.course.common.Bid;
 import com.onseo.course.util.SystemTime;
 import lombok.Data;
 

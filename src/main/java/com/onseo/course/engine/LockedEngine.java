@@ -1,7 +1,8 @@
 package com.onseo.course.engine;
 
 import com.onseo.course.common.Bid;
-import com.onseo.course.common.HistoryItem;
+import com.onseo.course.history.History;
+import com.onseo.course.history.HistoryItem;
 import com.onseo.course.common.Lot;
 import com.onseo.course.common.Lot.LotDescription;
 import org.slf4j.Logger;
@@ -22,9 +23,8 @@ public class LockedEngine implements Auction {
     private static final Logger log = LoggerFactory.getLogger(LockedEngine.class);
 
     private final Lot lot;
-    //    private final List<HistoryItem> history = new CopyOnWriteArrayList<>();
-//    private final List<HistoryItem> history = new LinkedList<>();
-    private final Collection<HistoryItem> history = new ConcurrentLinkedQueue<>();
+    private final History history = new History();
+
     private final AtomicBoolean active = new AtomicBoolean(false);
     private final CountDownLatch latch = new CountDownLatch(1);
     private final CompletableFuture<AuctionResult> auctionFinishFuture = new CompletableFuture<>();
@@ -112,7 +112,7 @@ public class LockedEngine implements Auction {
         getHistoryLock().readLock().lock();
         try {
             viewsCounter.incrementAndGet();
-            return new ArrayList<>(history);
+            return history.get();
         } finally {
             getHistoryLock().readLock().unlock();
         }

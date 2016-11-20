@@ -1,6 +1,6 @@
 package com.onseo.course.viewer;
 
-import com.onseo.course.common.HistoryItem;
+import com.onseo.course.history.HistoryItem;
 import com.onseo.course.engine.Auction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

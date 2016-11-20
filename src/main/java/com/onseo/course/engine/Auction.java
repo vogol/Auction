@@ -1,7 +1,7 @@
 package com.onseo.course.engine;
 
 import com.onseo.course.common.Bid;
-import com.onseo.course.common.HistoryItem;
+import com.onseo.course.history.HistoryItem;
 import com.onseo.course.common.Lot.LotDescription;
 
 import java.util.Collection;
