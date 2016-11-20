@@ -71,7 +71,7 @@ public class SingleLockedEngine implements Auction {
     }
 
     @Override
-    public synchronized void bid(LotDescription lotDescription, Bid bid) {
+    public void bid(LotDescription lotDescription, Bid bid) {
         log.trace("Got bid {} on {}", bid, lotDescription.getName());
         if (!active.get()) {
             log.warn("Bid {} discarded - Auction is finished", bid);
@@ -107,7 +107,7 @@ public class SingleLockedEngine implements Auction {
     }
 
     @Override
-    public synchronized Collection<HistoryItem> getHistory() {
+    public Collection<HistoryItem> getHistory() {
         getHistoryLock().readLock().lock();
         try {
             viewsCounter.incrementAndGet();
