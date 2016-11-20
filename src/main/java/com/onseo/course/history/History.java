@@ -5,14 +5,16 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by vlad on 11/20/16.
  */
 public class History {
 //    private final Collection<HistoryItem> history = new CopyOnWriteArrayList<>();
-    private final Collection<HistoryItem> history = new LinkedList<>();
-//    private final Collection<HistoryItem> history = new ConcurrentLinkedQueue<>();
+//    private final Collection<HistoryItem> history = new LinkedList<>();
+//    private final Collection<HistoryItem> history = new ArrayList<>();
+    private final Collection<HistoryItem> history = new ConcurrentLinkedQueue<>();
 
 
     public void add(HistoryItem historyItem) {

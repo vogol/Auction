@@ -18,46 +18,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * Created by VOgol on 17.11.2016.
  */
-public abstract class LockedEngine implements Auction {
+public abstract class LockedEngine extends Auction {
     private static final Logger log = LoggerFactory.getLogger(LockedEngine.class);
-
-    private final Lot lot;
-    private final History history = new History();
-
-    private final AtomicBoolean active = new AtomicBoolean(false);
-    private final CountDownLatch latch = new CountDownLatch(1);
-    private final CompletableFuture<AuctionResult> auctionFinishFuture = new CompletableFuture<>();
-    private final AtomicInteger bidsCounter = new AtomicInteger(0);
-    private final AtomicInteger viewsCounter = new AtomicInteger(0);
 
     protected final ReadWriteLock lotLock = new ReentrantReadWriteLock();
     protected final ReadWriteLock historyLock = new ReentrantReadWriteLock();
 
     public LockedEngine(Lot lot) {
-        this.lot = lot;
-    }
-
-    public CompletableFuture<AuctionResult> start() {
-        log.info("Auction on lot {} is started", lot);
-
-        active.set(true);
-        lot.activate();
-        latch.countDown();
-
-        ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1);
-        executorService.schedule(this::finish, lot.getDuration(), TimeUnit.SECONDS);
-
-        return auctionFinishFuture;
-    }
-
-    private void finish() {
-        active.set(false);
-        AuctionResult result = new AuctionResult(
-                lot.getName(),
-                lot.getCurrentBid().getBidder(), lot.getCurrentBid().getValue(),
-                history, bidsCounter.get(), viewsCounter.get());
-
-        auctionFinishFuture.complete(result);
+        super(lot);
     }
 
     @Override
@@ -125,14 +93,6 @@ public abstract class LockedEngine implements Auction {
     @Override
     public void waitForStart() throws InterruptedException {
         latch.await();
-    }
-
-    private Lot findLot(String name) {
-        if (lot.getName().equals(name)) {
-            return lot;
-        }
-
-        return null;
     }
 
     protected abstract ReadWriteLock getLotLock();

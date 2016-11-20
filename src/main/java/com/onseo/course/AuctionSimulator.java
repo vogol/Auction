@@ -4,9 +4,7 @@ import com.onseo.course.bot.Bot;
 import com.onseo.course.bot.BotLogic;
 import com.onseo.course.bot.SimpleIncLogic;
 import com.onseo.course.common.Lot;
-import com.onseo.course.engine.Auction;
-import com.onseo.course.engine.AuctionResult;
-import com.onseo.course.engine.DoubleLockedEngine;
+import com.onseo.course.engine.*;
 import com.onseo.course.history.HistoryItem;
 import com.onseo.course.viewer.Viewer;
 import org.slf4j.Logger;
@@ -20,7 +18,7 @@ import java.util.concurrent.Executors;
 public class AuctionSimulator {
     private static final Logger log = LoggerFactory.getLogger(AuctionSimulator.class);
 
-    private static final int AUCTIOIN_DURATION = 30;
+    private static final int AUCTIOIN_DURATION = 10;
     private static final int BOTS_COUNT = 100;
     private static final int BOTS_THREADS_COUNT = 100;
     private static final int BOTS_MONEY = 1_000_000;
@@ -31,10 +29,11 @@ public class AuctionSimulator {
     private Lot lot = new Lot("First LOT", AUCTIOIN_DURATION, 1);
 //    private Auction auction = new SynchronizedEngine(lot);
 //    private Auction auction = new SingleLockedEngine(lot);
-    private Auction auction = new DoubleLockedEngine(lot);
+//    private Auction auction = new DoubleLockedEngine(lot);
+    private Auction auction = new NonBlockingHistoryEngine(lot);
 
-    ExecutorService botsExecutor = Executors.newFixedThreadPool(BOTS_THREADS_COUNT);
-    ExecutorService viewersExecutor = Executors.newFixedThreadPool(VIEWERS_THREADS_COUNT);
+    private ExecutorService botsExecutor = Executors.newFixedThreadPool(BOTS_THREADS_COUNT);
+    private ExecutorService viewersExecutor = Executors.newFixedThreadPool(VIEWERS_THREADS_COUNT);
 
     private void initBots(int amount, Auction auction) {
         BotLogic logic = new SimpleIncLogic(1);
